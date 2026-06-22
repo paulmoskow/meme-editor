@@ -1,73 +1,58 @@
-# React + TypeScript + Vite
+# Photo Text Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Photo Text Editor is a browser-based image editing app built with React. It allows users to upload an image, add text on top of it, customize the text layer, and export the final result as a JPG file.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Upload an image from a local device
+- Add text over the image
+- Edit text content, size, color, and position
+- Prepare the composition for export
+- Save the final result as JPG
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- TypeScript
+- Vite
+- Fabric.js
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Photo Text Editor
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Photo Text Editor — это веб-приложение на React, предназначенное для простого редактирования изображений прямо в браузере. Пользователь может загрузить фото или картинку, добавить текстовый слой, настроить его отображение и сохранить готовый результат в формате JPG.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Возможности
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Загрузка изображения с устройства
+- Добавление текста поверх изображения
+- Настройка текста: содержимое, размер, цвет, позиция
+- Подготовка результата к экспорту
+- Сохранение изображения в JPG
+- Базовая структура под дальнейшее расширение редактора
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Технологии
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- React
+- TypeScript
+- Vite
+- Fabric.js
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Сценарий использования
+
+1. Пользователь загружает изображение.
+2. Добавляет текст на холст.
+3. Настраивает внешний вид текста.
+4. Экспортирует итоговое изображение в JPG.
+
+## Статус проекта
+
+Сейчас это базовая версия проекта с подготовленной архитектурой интерфейса и основой для интеграции графического редактора.
+
+## Планы по развитию
+
+- Поддержка нескольких текстовых слоев
+- Выбор шрифтов и дополнительных стилей
+- Масштабирование и вращение объектов
+- Поддержка PNG
+- Улучшенный UI панели инструментов
