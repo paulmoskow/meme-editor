@@ -1,4 +1,5 @@
-import { ChangeEvent, ClipboardEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent, ClipboardEvent } from 'react';
 import { Canvas, FabricImage } from 'fabric'
 
 function App() {
