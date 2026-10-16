@@ -137,7 +137,7 @@ select {
 .canvas-frame {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 640px;
   padding: 24px;
   border: 1px solid #d7dce2;
@@ -146,11 +146,14 @@ select {
   overflow: auto;
 }
 
-.canvas-frame canvas {
-  display: block;
-  max-width: 100%;
+.canvas-frame .canvas-container {
+  flex-shrink: 0;
   border: 1px solid #cfd6dd;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.canvas-frame canvas {
+  display: block;
 }
 
 @media (max-width: 1100px) {

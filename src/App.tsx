@@ -27,8 +27,8 @@ function App() {
 
     // Create Fabric canvas once after mount
     const fabricCanvas = new Canvas(canvasElement, {
-      width: 900,
-      height: 560,
+      width: 720,
+      height: 480,
       backgroundColor: '#ffffff',
       preserveObjectStacking: true,
       selection: true,
@@ -67,14 +67,6 @@ function App() {
         currentImageRef.current = null
       }
 
-      // Make the base image non-interactive for now
-      image.set({
-        left: 0,
-        top: 0,
-        selectable: false,
-        evented: false,
-      })
-
       const canvasWidth = canvas.getWidth()
       const canvasHeight = canvas.getHeight()
 
@@ -87,15 +79,16 @@ function App() {
         canvasHeight / imageHeight
       )
 
-      image.scale(scale)
-
-      const scaledWidth = imageWidth * scale
-      const scaledHeight = imageHeight * scale
-
-      // Center image inside the workspace
+     // Make the base image non-interactive for now
       image.set({
-        left: (canvasWidth - scaledWidth) / 2,
-        top: (canvasHeight - scaledHeight) / 2,
+        originX: 'center',
+        originY: 'center',
+        left: canvasWidth / 2,
+        top: canvasHeight / 2,
+        scaleX: scale,
+        scaleY: scale,
+        selectable: false,
+        evented: false,
       })
 
       canvas.add(image)
