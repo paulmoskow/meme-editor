@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent } from 'react';
-import { Canvas, FabricImage } from 'fabric'
+import { Canvas, FabricImage, Textbox } from 'fabric'
 
 function App() {
   // DOM canvas element
@@ -14,6 +14,14 @@ function App() {
 
   // Focusable area that receives paste events
   const pasteZoneRef = useRef<HTMLDivElement | null>(null)
+
+  // Text lay on focus
+  const selectedTextRef = useRef<Textbox | null>(null)
+
+  const [hasSelectedText, setHasSelectedText] = useState(false)
+  const [textValue, setTextValue] = useState('')
+  const [fontSize, setFontSize] = useState(48)
+  const [textColor, setTextColor] = useState('#ffffff')
 
   const [isReady, setIsReady] = useState(false)
   const [fileName, setFileName] = useState('No image selected')
@@ -37,6 +45,28 @@ function App() {
     fabricCanvasRef.current = fabricCanvas
     fabricCanvas.renderAll()
     setIsReady(true)
+
+    // Synchronization of the text panel
+    const syncSelection = () => {
+      const active = fabricCanvas.getActiveObject()
+      
+      if (active instanceof Textbox) {
+        selectedTextRef.current = active
+        setHasSelectedText(true)
+        setTextValue(active.text ?? '')
+        setFontSize(Math.round(active.fontSize ?? 48))
+        setTextColor(typeof active.fill === 'string' ? active.fill : '#ffffff')
+      } else {
+        selectedTextRef.current = null
+        setHasSelectedText(false)
+      }
+    }
+
+    fabricCanvas.on('selection:created', syncSelection)
+    fabricCanvas.on('selection:updated', syncSelection)
+    fabricCanvas.on('selection:cleared', syncSelection)
+    fabricCanvas.on('text:changed', syncSelection)
+
 
     // Dispose Fabric instance on unmount
     return () => {
@@ -171,6 +201,85 @@ function App() {
     canvas.renderAll()
   }
 
+  const addTextLayer = () => {
+    const canvas = fabricCanvasRef.current
+    if (!canvas) return
+
+    const textbox = new Textbox('Your text', {
+      originX: 'center',
+      originY:'center',
+      left: canvas.getWidth()/2,
+      top: canvas.getHeight()/2,
+      width: 400,
+      fontSize: 48,
+      fontFamily: 'Arial',
+      fontWeight:'700',
+      fill: '#ffffff',
+      textAlign: 'center',
+    })
+
+    canvas.add(textbox)
+    canvas.setActiveObject(textbox)
+    canvas.requestRenderAll()
+    setStatusMessage('Text added. Drag it, or adit it in the panel.')
+  }
+
+  const updateSelectedText = (props: Partial<Textbox>) => {
+  const canvas = fabricCanvasRef.current
+  const textObject = selectedTextRef.current
+  if (!canvas || !textObject) return
+
+  textObject.set(props)
+  textObject.setCoords()
+  canvas.requestRenderAll()
+}
+
+const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  setTextValue(event.target.value)
+  updateSelectedText({ text: event.target.value })
+}
+
+const handleFontSizeChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const size = Number(event.target.value)
+  setFontSize(size)
+  updateSelectedText({ fontSize: size })
+}
+
+const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
+  setTextColor(event.target.value)
+  updateSelectedText({ fill: event.target.value })
+}
+
+const removeSelectedText = () => {
+  const canvas = fabricCanvasRef.current
+  const textObject = selectedTextRef.current
+  if (!canvas || !textObject) return
+
+  canvas.remove(textObject)
+  canvas.discardActiveObject()
+  canvas.requestRenderAll()
+}
+
+const exportJpeg = () => {
+  const canvas = fabricCanvasRef.current
+  if (!canvas) return
+
+  // Delete selection for frame not to get into the file
+  canvas.discardActiveObject()
+  canvas.requestRenderAll()
+
+  const dataUrl = canvas.toDataURL({
+    format: 'jpeg',
+    quality: 0.92,
+    multiplier: 1,
+  })
+
+  const link = document.createElement('a')
+  link.href = dataUrl
+  link.download = 'photo-text-editor.jpg'
+  link.click()
+}
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -215,6 +324,61 @@ function App() {
               onClick={clearCanvasImage}
             >
               Remove image
+            </button>
+          </section>
+          <section className="panel-section">
+            <h2>Text</h2>
+
+            <button className="secondary-button" type="button" onClick={addTextLayer}>
+              Add text
+            </button>
+
+            {hasSelectedText && (
+              <div className="text-controls">
+                <label className="field-label" htmlFor="text-value">Content</label>
+                <textarea
+                  id="text-value"
+                  className="text-input"
+                  rows={3}
+                  value={textValue}
+                  onChange={handleTextChange}
+                />
+
+                <label className="field-label" htmlFor="text-size">
+                  Size: {fontSize}px
+                </label>
+                <input
+                  id="text-size"
+                  type="range"
+                  min={12}
+                  max={200}
+                  value={fontSize}
+                  onChange={handleFontSizeChange}
+                />
+
+                <label className="field-label" htmlFor="text-color">Color</label>
+                <input
+                  id="text-color"
+                  type="color"
+                  value={textColor}
+                  onChange={handleColorChange}
+                />
+
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={removeSelectedText}
+                >
+                  Remove text
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section className="panel-section">
+            <h2>Export</h2>
+            <button className="secondary-button" type="button" onClick={exportJpeg}>
+              Download JPG
             </button>
           </section>
         </aside>
