@@ -105,9 +105,6 @@ function App() {
         currentImageRef.current = null
       }
 
-      const canvasWidth = canvas.getWidth()
-      const canvasHeight = canvas.getHeight()
-
       const imageWidth = image.width ?? 1
       const imageHeight = image.height ?? 1
 
