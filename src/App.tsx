@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent } from 'react';
 import { Canvas, FabricImage, Textbox } from 'fabric'
 
+const MAX_EXPORT_SIDE = 4096
+const MAX_CANVAS_WIDTH = 900
+const MAX_CANVAS_HEIGHT = 560
+
 function App() {
   // DOM canvas element
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
@@ -28,6 +32,10 @@ function App() {
   const [statusMessage, setStatusMessage] = useState(
     'Upload an image or paste one from the clipboard.'
   )
+
+  //state for download file
+  const [jpegQuality, setJpegQuality] = useState(92)
+  const [exportOriginalSize, setExportOriginalSize] = useState(true)
 
   useEffect(() => {
     const canvasElement = canvasElementRef.current
@@ -104,22 +112,46 @@ function App() {
       const imageHeight = image.height ?? 1
 
       // Fit image into the canvas while keeping aspect ratio
-      const scale = Math.min(
-        canvasWidth / imageWidth,
-        canvasHeight / imageHeight
+      const fitScale = Math.min(
+        1,
+        MAX_CANVAS_WIDTH / imageWidth,
+        MAX_CANVAS_HEIGHT / imageHeight
       )
+
+      const previousWidth = canvas.getWidth()
+      const previousHeight = canvas.getHeight()
+
+      const newWidth = Math.max(1, Math.round(imageWidth * fitScale))
+      const newHeigth = Math.max(1, Math.round(imageHeight * fitScale))
+
+      //set canvas dimension as picture
+      canvas.setDimensions({ width: newWidth, height: newHeigth })
+      //set text position
+      const ratioX = newWidth / previousWidth
+      const ratioY = newHeigth / previousHeight
+
+      canvas.getObjects().forEach((object) => {
+        object.set({
+          left: (object.left ?? 0) * ratioX,
+          top: (object.top ?? 0) * ratioY,
+        })
+        object.setCoords()
+      })
+    
 
      // Make the base image non-interactive for now
       image.set({
         originX: 'center',
         originY: 'center',
-        left: canvasWidth / 2,
-        top: canvasHeight / 2,
-        scaleX: scale,
-        scaleY: scale,
+        left: newWidth / 2,
+        top: newHeigth / 2,
+        scaleX: newWidth / imageWidth,
+        scaleY: newHeigth / imageHeight,
         selectable: false,
         evented: false,
       })
+
+      image.setCoords()
 
       canvas.add(image)
       canvas.sendObjectToBack(image)
@@ -260,6 +292,8 @@ const removeSelectedText = () => {
   canvas.requestRenderAll()
 }
 
+// export of the picture into jpg file
+
 const exportJpeg = () => {
   const canvas = fabricCanvasRef.current
   if (!canvas) return
@@ -268,16 +302,33 @@ const exportJpeg = () => {
   canvas.discardActiveObject()
   canvas.requestRenderAll()
 
+  const canvasWidth = canvas.getWidth()
+  const canvasHeight = canvas.getHeight()
+  const image = currentImageRef.current
+
+//multiply canvas to set back default quality of the picture
+  let multiplier = 1
+  if (exportOriginalSize && image) {
+    multiplier = 1 / (image.scaleX || 1)
+  }
+
+  const maxMultiplier = MAX_EXPORT_SIDE / Math.max(canvasWidth, canvasHeight)
+  multiplier = Math.min(multiplier, maxMultiplier)
+
   const dataUrl = canvas.toDataURL({
     format: 'jpeg',
-    quality: 0.92,
-    multiplier: 1,
+    quality: jpegQuality / 100,
+    multiplier,
   })
 
   const link = document.createElement('a')
   link.href = dataUrl
-  link.download = 'photo-text-editor.jpg'
+  link.download = 'my_picture.jpg'
   link.click()
+
+  setStatusMessage(
+    `Exported JPG: ${Math.round(canvasWidth * multiplier)}×${Math.round(canvasHeight * multiplier)} px.`
+  )
 }
 
   return (
@@ -287,19 +338,14 @@ const exportJpeg = () => {
           <p className="eyebrow">React · Vite · TypeScript · Fabric.js</p>
           <h1>Photo Text Editor</h1>
           <p className="subtitle">
-            Step 2.1: upload an image from disk or paste it directly from the
-            clipboard.
+            Upload an image from disk or paste it directly from the
+            clipboard. Then add your text and download the JPG file
           </p>
         </div>
       </header>
 
       <main className="workspace">
         <aside className="panel panel-left">
-          <section className="panel-section">
-            <h2>Status</h2>
-            <p>{isReady ? 'Canvas is ready.' : 'Canvas is loading...'}</p>
-            <p className="helper-text">{statusMessage}</p>
-          </section>
 
           <section className="panel-section">
             <h2>Image input</h2>
@@ -377,6 +423,26 @@ const exportJpeg = () => {
 
           <section className="panel-section">
             <h2>Export</h2>
+            <label htmlFor="jpeg-quality" className='field-label'>
+              JPG quality: {jpegQuality}%
+            </label>
+            <input 
+              id="jpeg-quality"
+              type="range"
+              min={50}
+              max={100}
+              value={jpegQuality}
+              onChange={(event) => setJpegQuality(Number(event.target.value))} 
+            />
+            <label className="checkbox-label">
+              <input 
+                type="checkbox"
+                checked={exportOriginalSize}
+                onChange={(event) => setExportOriginalSize(event.target.checked)}
+              />
+              Original image resolution
+            </label>
+
             <button className="secondary-button" type="button" onClick={exportJpeg}>
               Download JPG
             </button>
@@ -401,19 +467,18 @@ const exportJpeg = () => {
         </section>
 
         <aside className="panel panel-right">
+
           <section className="panel-section">
-            <h2>Clipboard support</h2>
-            <p>
-              You can now either upload a local image or paste a copied image
-              directly into the editor workspace.
-            </p>
+            <h2>Status</h2>
+            <p>{isReady ? 'Canvas is ready.' : 'Canvas is loading...'}</p>
+            <p className="helper-text">{statusMessage}</p>
           </section>
 
           <section className="panel-section">
-            <h2>Next step</h2>
+            <h2>Clipboard support</h2>
             <p>
-              After image input is done, the next step is adding a text layer on
-              top of the canvas.
+              You can either upload a local image or paste a copied image
+              directly into the editor workspace.
             </p>
           </section>
         </aside>
