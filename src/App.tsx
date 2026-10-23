@@ -234,16 +234,20 @@ function App() {
     const canvas = fabricCanvasRef.current
     if (!canvas) return
 
-    const textbox = new Textbox('Your text', {
+    const textbox = new Textbox('YOUR TEXT', {
       originX: 'center',
-      originY:'center',
-      left: canvas.getWidth()/2,
-      top: canvas.getHeight()/2,
-      width: 400,
+      originY: 'center',
+      left: canvas.getWidth() / 2,
+      top: canvas.getHeight() / 2,
+      width: canvas.getWidth() * 0.8,
       fontSize: 48,
-      fontFamily: 'Arial',
-      fontWeight:'700',
+      fontFamily: 'Impact, Anton, sans-serif',
+      fontWeight: 'normal',
       fill: '#ffffff',
+      stroke: '#000000',
+      strokeWidth: 3,
+      strokeLineJoin: 'round',
+      paintFirst: 'stroke',
       textAlign: 'center',
     })
 
@@ -331,25 +335,31 @@ const exportJpeg = () => {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="topbar-copy">
-          <p className="eyebrow">React · Vite · TypeScript · Fabric.js</p>
-          <h1>Photo Text Editor</h1>
-          <p className="subtitle">
-            Upload an image from disk or paste it directly from the
-            clipboard. Then add your text and download the JPG file
-          </p>
-        </div>
+        <h1 className="logo">
+          Photo <span className="logo-accent">Text</span> Editor
+        </h1>
+        <p className="tagline">Upload a pic · add a caption · download JPG</p>
       </header>
 
       <main className="workspace">
-        <aside className="panel panel-left">
-
+        <aside className="tools">
           <section className="panel-section">
-            <h2>Image input</h2>
+            <h2>
+              <span className="step-badge">1</span>Image
+            </h2>
 
-            <label className="upload-label" htmlFor="image-upload">
-              Select image
-            </label>
+            <div className="btn-row">
+              <label className="btn btn-lavender" htmlFor="image-upload">
+                Select image
+              </label>
+              <button
+                className="btn btn-pink"
+                type="button"
+                onClick={clearCanvasImage}
+              >
+                Remove
+              </button>
+            </div>
 
             <input
               id="image-upload"
@@ -359,36 +369,41 @@ const exportJpeg = () => {
               onChange={handleImageUpload}
             />
 
-            <p className="helper-text">Current file: {fileName}</p>
+            <p className="file-name" title={fileName}>
+              {fileName}
+            </p>
+          </section>
+
+          <section className="panel-section">
+            <h2>
+              <span className="step-badge">2</span>Text
+            </h2>
 
             <button
-              className="secondary-button"
+              className="btn btn-yellow btn-wide"
               type="button"
-              onClick={clearCanvasImage}
+              onClick={addTextLayer}
             >
-              Remove image
-            </button>
-          </section>
-          <section className="panel-section">
-            <h2>Text</h2>
-
-            <button className="secondary-button" type="button" onClick={addTextLayer}>
-              Add text
+              + Add text
             </button>
 
-            {hasSelectedText && (
-              <div className="text-controls">
-                <label className="field-label" htmlFor="text-value">Content</label>
-                <textarea
-                  id="text-value"
-                  className="text-input"
-                  rows={3}
-                  value={textValue}
-                  onChange={handleTextChange}
-                />
+            <label className="field-label" htmlFor="text-value">
+              Caption
+            </label>
+            <textarea
+              id="text-value"
+              className="text-input"
+              rows={2}
+              placeholder="Select or add a text layer"
+              value={hasSelectedText ? textValue : ''}
+              onChange={handleTextChange}
+              disabled={!hasSelectedText}
+            />
 
+            <div className="field-row">
+              <div className="field">
                 <label className="field-label" htmlFor="text-size">
-                  Size: {fontSize}px
+                  Size <b>{fontSize}px</b>
                 </label>
                 <input
                   id="text-size"
@@ -397,42 +412,53 @@ const exportJpeg = () => {
                   max={200}
                   value={fontSize}
                   onChange={handleFontSizeChange}
+                  disabled={!hasSelectedText}
                 />
+              </div>
 
-                <label className="field-label" htmlFor="text-color">Color</label>
+              <div className="field">
+                <label className="field-label" htmlFor="text-color">
+                  Color
+                </label>
                 <input
                   id="text-color"
                   type="color"
                   value={textColor}
                   onChange={handleColorChange}
+                  disabled={!hasSelectedText}
                 />
-
-                <button
-                  className="secondary-button"
-                  type="button"
-                  onClick={removeSelectedText}
-                >
-                  Remove text
-                </button>
               </div>
-            )}
+            </div>
+
+            <button
+              className="btn btn-pink btn-wide"
+              type="button"
+              onClick={removeSelectedText}
+              disabled={!hasSelectedText}
+            >
+              Remove text
+            </button>
           </section>
 
           <section className="panel-section">
-            <h2>Export</h2>
-            <label htmlFor="jpeg-quality" className='field-label'>
-              JPG quality: {jpegQuality}%
+            <h2>
+              <span className="step-badge">3</span>Export
+            </h2>
+
+            <label className="field-label" htmlFor="jpeg-quality">
+              JPG quality <b>{jpegQuality}%</b>
             </label>
-            <input 
+            <input
               id="jpeg-quality"
               type="range"
               min={50}
               max={100}
               value={jpegQuality}
-              onChange={(event) => setJpegQuality(Number(event.target.value))} 
+              onChange={(event) => setJpegQuality(Number(event.target.value))}
             />
+
             <label className="checkbox-label">
-              <input 
+              <input
                 type="checkbox"
                 checked={exportOriginalSize}
                 onChange={(event) => setExportOriginalSize(event.target.checked)}
@@ -440,7 +466,11 @@ const exportJpeg = () => {
               Original image resolution
             </label>
 
-            <button className="secondary-button" type="button" onClick={exportJpeg}>
+            <button
+              className="btn btn-mint btn-wide btn-big"
+              type="button"
+              onClick={exportJpeg}
+            >
               Download JPG
             </button>
           </section>
@@ -457,31 +487,19 @@ const exportJpeg = () => {
             <canvas ref={canvasElementRef} />
           </div>
 
-          <div className="paste-hint">
-            Click this area and press <kbd>Ctrl</kbd> + <kbd>V</kbd> or{' '}
-            <kbd>Cmd</kbd> + <kbd>V</kbd> to paste an image from the clipboard.
+          <div className="status-bar">
+            <span className="status-dot" data-ready={isReady} />
+            <p className="status-text">
+              {isReady ? statusMessage : 'Canvas is loading...'}
+            </p>
+            <p className="paste-hint">
+              Click here, then <kbd>Ctrl</kbd> + <kbd>V</kbd> to paste an image
+            </p>
           </div>
         </section>
-
-        <aside className="panel panel-right">
-
-          <section className="panel-section">
-            <h2>Status</h2>
-            <p>{isReady ? 'Canvas is ready.' : 'Canvas is loading...'}</p>
-            <p className="helper-text">{statusMessage}</p>
-          </section>
-
-          <section className="panel-section">
-            <h2>Clipboard support</h2>
-            <p>
-              You can either upload a local image or paste a copied image
-              directly into the editor workspace.
-            </p>
-          </section>
-        </aside>
       </main>
     </div>
-  )
+  ) 
 }
 
 export default App
