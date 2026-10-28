@@ -17,8 +17,6 @@ function useIsMobile(query = '(max-width: 900px)') {
 }
 
 const MAX_EXPORT_SIDE = 4096
-const MAX_CANVAS_WIDTH = 900
-const MAX_CANVAS_HEIGHT = 560
 
 function App() {
   // DOM canvas element
