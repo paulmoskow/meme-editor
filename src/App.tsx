@@ -284,17 +284,23 @@ function App() {
 
   const clearCanvasImage = () => {
     const canvas = fabricCanvasRef.current
-    const currentImage = currentImageRef.current
+    if (!canvas || !currentImageRef.current) return
 
-    if (!canvas || !currentImage) return
+    // remove everything from canvas
+    canvas.discardActiveObject()
+    canvas.remove(...canvas.getObjects())
 
-    // Remove current image and reset UI state
-    canvas.remove(currentImage)
+    // return the working area size
+    const { width, height } = getMaxCanvasSize()
+    canvas.setDimensions({ width, height })
+
     currentImageRef.current = null
+    selectedTextRef.current = null
+    setHasSelectedText(false)
     setFileName('No image selected')
-    setStatusMessage('Canvas image removed.')
+    setStatusMessage('Image removed.')
     setHasImage(false)
-    canvas.renderAll()
+    canvas.requestRenderAll()
   }
 
   const addTextLayer = () => {
@@ -321,7 +327,7 @@ function App() {
     canvas.add(textbox)
     canvas.setActiveObject(textbox)
     canvas.requestRenderAll()
-    setStatusMessage('Text added. Drag it, or adit it in the panel.')
+    setStatusMessage('Text added. Drag it, or edit it in the panel.')
   }
 
   const updateSelectedText = (props: Partial<Textbox>) => {
@@ -431,7 +437,35 @@ const applyColor = (color: string) => {
   updateSelectedText({ fill: color })
 }
 
-// Мобильная нижняя панель
+//removing image and text if it is text
+const deleteLayer = () => {
+  const canvas = fabricCanvasRef.current
+  if (!canvas) return
+
+  //removing chosen text
+  if (selectedTextRef.current) {
+    removeSelectedText()
+    setStatusMessage('Text removed.')
+    return
+  }
+
+  //removing the last text
+  const texts = canvas
+    .getObjects()
+    .filter((object): object is Textbox => object instanceof Textbox)
+  const lastText = texts[texts.length - 1]
+
+  if (lastText) {
+    canvas.remove(lastText)
+    canvas.requestRenderAll()
+    setStatusMessage('Text removed.')
+    return
+  }
+
+  // removing image if there is no text
+  clearCanvasImage()
+}
+
 const mobileBar = (
   <div className="mobile-bar">
     <div className="text-strip" data-disabled={!hasSelectedText}>
@@ -473,7 +507,13 @@ const mobileBar = (
       <button type="button" className="icon-btn icon-btn--yellow" aria-label="Add text" onClick={addTextLayer} disabled={!hasImage}>
         <IconTextPlus />
       </button>
-      <button type="button" className="icon-btn icon-btn--pink" aria-label="Delete text" onClick={removeSelectedText} disabled={!hasSelectedText}>
+      <button
+        type="button"
+        className="icon-btn icon-btn--pink"
+        aria-label="Delete text or image"
+        onClick={deleteLayer}
+        disabled={!hasImage}
+      >
         <IconTrash />
       </button>
       <button type="button" className="icon-btn icon-btn--mint" aria-label="Download JPG" onClick={exportJpeg} disabled={!hasImage}>
@@ -489,7 +529,7 @@ const mobileBar = (
         <h1 className="logo">
           Photo <span className="logo-accent">Text</span> Editor
         </h1>
-        <p className="tagline">Upload a pic · add a caption · download JPG</p>
+        <p className="tagline">UPLOAD A PIC · ADD A CAPTION · DOWNLOAD JPG</p>
       </header>
 
       <main className="workspace">
@@ -566,18 +606,11 @@ const mobileBar = (
                   className="btn btn-pink"
                   type="button"
                   onClick={clearCanvasImage}
+                  disabled={!hasImage}
                 >
                   Remove
                 </button>
               </div>
-
-              <input
-                id="image-upload"
-                className="file-input"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
 
               <p className="file-name" title={fileName}>
                 {fileName}
@@ -593,6 +626,7 @@ const mobileBar = (
                 className="btn btn-yellow btn-wide"
                 type="button"
                 onClick={addTextLayer}
+                disabled={!hasImage}
               >
                 + Add text
               </button>
@@ -680,6 +714,7 @@ const mobileBar = (
                 className="btn btn-mint btn-wide btn-big"
                 type="button"
                 onClick={exportJpeg}
+                disabled={!hasImage}
               >
                 Download JPG
               </button>
