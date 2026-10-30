@@ -10,8 +10,6 @@ import type { ExportApi } from '../hooks/useExport'
 import type { ImageInputApi } from '../hooks/useImageInput'
 import type { TextLayerApi } from '../hooks/useTextLayer'
 
-const QUICK_COLORS = ['#ffffff', '#000000', '#ffe58f']
-
 type Props = {
   imageInput: ImageInputApi
   textLayer: TextLayerApi
@@ -36,22 +34,39 @@ export function MobileBar({ imageInput, textLayer, exporter, onDelete }: Props) 
           onChange={textLayer.handleFontSizeChange}
           disabled={!textLayer.hasSelectedText}
         />
-        {QUICK_COLORS.map((color) => (
-          <button
-            key={color}
-            type="button"
-            className="swatch-btn"
-            aria-label={`Text color ${color}`}
-            disabled={!textLayer.hasSelectedText}
-            onClick={() => textLayer.applyColor(color)}
-          >
-            <span
-              className="swatch"
-              style={{ background: color }}
-              data-active={textLayer.textColor.toLowerCase() === color}
-            />
-          </button>
-        ))}
+        {(() => {
+          const isWhite = textLayer.textColor.toLowerCase() === '#ffffff'
+
+          return (
+            <>
+              <button
+                type="button"
+                className="swatch-btn"
+                aria-label="White text"
+                disabled={!textLayer.hasSelectedText}
+                onClick={() => textLayer.applyColor('#ffffff')}
+              >
+                <span className="swatch" style={{ background: '#ffffff' }} data-active={isWhite} />
+              </button>
+
+              <label className="swatch-btn color-picker-btn" aria-label="Custom text color">
+                <span
+                  className="swatch"
+                  style={isWhite ? undefined : { background: textLayer.textColor }}
+                  data-rainbow={isWhite}
+                  data-active={!isWhite}
+                />
+                <input
+                  type="color"
+                  className="color-native"
+                  value={textLayer.textColor}
+                  onChange={textLayer.handleColorChange}
+                  disabled={!textLayer.hasSelectedText}
+                />
+              </label>
+            </>
+          )
+        })()}
       </div>
 
       <div className="icon-row">

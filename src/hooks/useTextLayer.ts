@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react'
 import { Canvas, Textbox } from 'fabric'
 import { DEFAULT_FONT_SIZE, DEFAULT_TEXT_COLOR } from '../constants'
 import type { SetStatus } from '../types'
+import { getOutlineColor, OUTLINE_WIDTH } from '../utils/color'
 
 type Options = {
   canvas: Canvas | null
@@ -61,8 +62,8 @@ export function useTextLayer({ canvas, setStatusMessage }: Options) {
       fontFamily: 'Impact, Anton, sans-serif',
       fontWeight: 'normal',
       fill: DEFAULT_TEXT_COLOR,
-      stroke: '#000000',
-      strokeWidth: 3,
+      stroke: getOutlineColor(DEFAULT_TEXT_COLOR),
+      strokeWidth: OUTLINE_WIDTH,
       strokeLineJoin: 'round',
       paintFirst: 'stroke',
       textAlign: 'center',
@@ -99,8 +100,14 @@ export function useTextLayer({ canvas, setStatusMessage }: Options) {
   }
 
   const applyColor = (color: string) => {
+    const outline = getOutlineColor(color)
+
     setTextColor(color)
-    updateSelectedText({ fill: color })
+    updateSelectedText({
+      fill: color,
+      stroke: outline,
+      strokeWidth: outline ? OUTLINE_WIDTH : 0,
+    })
   }
 
   const removeText = (target: Textbox) => {
