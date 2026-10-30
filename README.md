@@ -1,51 +1,64 @@
 # Photo Text Editor
 
-Photo Text Editor is a browser-based image editing app built with React. It allows users to upload an image, add text on top of it, customize the text layer, and export the final result as a JPG file.
+A browser-based meme and image editor. It helps you to put text over any image and download the result as a JPG. Everything runs locally right in  browser without uploading your files. 
 
-The link to get app: https://paulmoskow.github.io/meme-editor/ 
+**Live demo:** https://paulmoskow.github.io/meme-editor/
 
 ## Features
 
-- Upload an image from a local device
-- Add text over the image
-- Edit text content, size, color, and position
-- Prepare the composition for export
-- Save the final result as JPG
+- Load an image from your device, or paste it from the clipboard (Ctrl+V, or long-press and "Paste" on a mobile)
+- Add text layers, resize and edit them 
+- Change text, size and color 
+- Text outline adapts for the color automatically: dark text gets a white outline, light text gets a black one
+- Export to JPG with adjustable quality, in the original image resolution
+- Responsive layout: side panel on desktop, icon toolbar on mobile
 
-## Tech Stack
+## Tech stack
 
-- React
-- TypeScript
-- Vite
-- Fabric.js
+React · TypeScript · Vite · Fabric.js
 
+## Getting started
 
-# Photo Text Editor
+```bash
+git clone https://github.com/paulmoskow/meme-editor.git
+cd meme-editor
+npm install
+npm run dev
+```
 
-Photo Text Editor — это веб-приложение на React, предназначенное для простого редактирования изображений прямо в браузере. Пользователь может загрузить фото или картинку, добавить текстовый слой, настроить его отображение и сохранить готовый результат в формате JPG.
+Other scripts:
 
-Ссылка на приложение: https://paulmoskow.github.io/meme-editor/ 
+```bash
+npm run build     # type-check and build for production
+npm run preview   # preview the production build locally
+```
 
-## Возможности
+## Project structure
 
-- Загрузка изображения с устройства
-- Добавление текста поверх изображения
-- Настройка текста: содержимое, размер, цвет, позиция
-- Подготовка результата к экспорту
-- Сохранение изображения в JPG
-- Базовая структура под дальнейшее расширение редактора
+```
+src/
+  App.tsx            # assembles the editor
+  components/        # Header, CanvasStage, EmptyState, DesktopTools, MobileBar
+  hooks/             # useFabricCanvas, useImageInput, useTextLayer, useExport, useIsMobile
+  utils/             # canvas size, clipboard parsing, color, download helpers
+  constants.ts
+  icons.tsx
+```
 
-## Технологии
+<details>
+<summary>Описание на русском</summary>
 
-- React
-- TypeScript
-- Vite
-- Fabric.js
+**Photo Text Editor** — веб-редактор для добавления подписей к изображениям прямо в браузере. Сделай собственный мем быстро и просто! Загрузи или вставь картинку, добавь текст и скачай результат в JPG. Всё работает в браузере, изображения никуда не надо отправлять.
 
-## Сценарий использования
+**Возможности**
 
-1. Пользователь загружает изображение.
-2. Добавляет текст на холст.
-3. Настраивает внешний вид текста.
-4. Экспортирует итоговое изображение в JPG.
+- Загрузка файла или вставка из буфера обмена (Ctrl+V; на телефоне долгое нажатие и «Вставить»)
+- Текстовые слои: перетаскивание, изменение размера и правка прямо на холсте
+- Размер и цвет текста; обводка подбирается автоматически
+- Удаление текста по одному слою, затем самой картинки
+- Экспорт в JPG с настройкой качества и в исходном разрешении
+- Адаптивный интерфейс: боковая панель на десктопе и панель с иконками на телефоне
 
+**Запуск:** `npm install`, затем `npm run dev`.
+
+</details>
