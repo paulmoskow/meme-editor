@@ -15,7 +15,9 @@ A browser-based meme and image editor. It helps you to put text over any image a
 
 ## Tech stack
 
-React · TypeScript · Vite · Fabric.js
+- **React:** manages the UI state (panels, buttons, mobile and desktop layouts)
+- **Fabric.js:** handles the canvas (image, text layers, selection, export)
+- **TypeScript** and **Vite:** typed code and fast development tooling
 
 ## Getting started
 
